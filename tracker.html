@@ -1,0 +1,1280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SlimEasy - Track your food intake, nutrition, and plan your meals for effective weight management">
+    <meta name="theme-color" content="#4CAF50">
+    <title>SlimEasy - Food Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Preload critical assets -->
+    <link rel="preload" href="theme.js" as="script">
+    <link rel="preload" href="utils.js" as="script">
+    <link rel="preload" href="tracker.js" as="script">
+    <link rel="preload" href="slimeasylogo.jpg" as="image">
+</head>
+<body>
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="main-nav-container">
+            <a href="index.html" class="main-nav-logo">
+                <img src="slimeasylogo.jpg" alt="SlimEasy">
+                <span>SlimEasy</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="main-nav-links" id="mainNavLinks">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="tracker.html" class="nav-link active">
+                    <i class="fas fa-utensils"></i> Food Tracker
+                </a>
+                <a href="exercise.html" class="nav-link">
+                    <i class="fas fa-running"></i> Exercise
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Food Tracker</h1>
+        <p id="welcomeMessage"></p>
+        
+        <!-- Tracker Navigation Bar -->
+        <div class="nav-bar">
+            <button id="viewSummary" class="nav-button active">
+                <i class="fas fa-chart-pie"></i> Summary
+            </button>
+            <button id="viewManual" class="nav-button">
+                <i class="fas fa-utensils"></i> Add Food
+            </button>
+            <button id="viewMealBuilder" class="nav-button">
+                <i class="fas fa-hamburger"></i> Meal Builder
+            </button>
+            <button id="viewPlanner" class="nav-button">
+                <i class="fas fa-calendar-alt"></i> Weekly Plan
+            </button>
+        </div>
+
+        <!-- Summary -->
+        <section id="summary" class="tab-content active">
+            <h2><i class="fas fa-chart-line"></i> Your Plan Summary</h2>
+            <div class="summary-cards">
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-fire"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>BMR</h3>
+                        <p id="bmr">--</p>
+                        <p id="bmrUnits" class="units">kcal/day</p>
+                        <span class="info">?
+                            <span class="tooltip">Basal Metabolic Rate (BMR) is the number of calories your body burns at rest to keep you alive—like breathing and keeping your heart beating. It's your baseline energy need!</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-bolt"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>TDEE</h3>
+                        <p id="tdee">--</p>
+                        <p id="tdeeUnits" class="units">kcal/day</p>
+                        <span class="info">?
+                            <span class="tooltip">Total Daily Energy Expenditure (TDEE) is your BMR plus the calories you burn moving around and exercising. It's how much energy you use in a day!</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-minus-circle"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>Daily Deficit</h3>
+                        <p id="dailyDeficit">--</p>
+                        <p id="deficitUnits" class="units">kcal/day</p>
+                    </div>
+                </div>
+                
+                <div class="summary-card">
+                    <div class="summary-icon">
+                        <i class="fas fa-bullseye"></i>
+                    </div>
+                    <div class="summary-content">
+                        <h3>Daily Goal</h3>
+                        <p id="dailyGoal">--</p>
+                        <p id="goalUnits" class="units">kcal/day</p>
+                    </div>
+                </div>
+            </div>
+            
+            <p class="note"><i class="fas fa-info-circle"></i> Note: A deficit over 500 kcal (2092 kJ) is not recommended for long-term weight loss.</p>
+            
+            <!-- Water Tracking -->
+            <div class="card">
+                <div class="card-header">
+                    <i class="fas fa-tint"></i>
+                    <h3 class="card-title">Water Intake Tracker</h3>
+                </div>
+                <div class="card-body">
+                    <p>Track your daily water intake to stay hydrated (goal: 8 glasses per day)</p>
+                    <div class="water-tracker">
+                        <div id="waterGlasses"></div>
+                        <div class="water-controls">
+                            <button class="water-btn" id="addWater">
+                                <i class="fas fa-plus"></i>
+                            </button>
+                            <button class="water-btn" id="removeWater">
+                                <i class="fas fa-minus"></i>
+                            </button>
+                        </div>
+                    </div>
+                    <div class="progress-container water-progress-container">
+                        <div class="progress-bar progress-bar-water" id="waterProgress" style="width: 0%"></div>
+                    </div>
+                    <p id="waterStatus">0/8 glasses</p>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="goToManual" class="action-button">
+                    <i class="fas fa-plus-circle"></i> Add Food
+                </button>
+                <button id="goToExercise" class="action-button">
+                    <i class="fas fa-running"></i> Add Exercise
+                </button>
+            </div>
+            
+            <!-- Daily Tip -->
+            <div class="daily-tip">
+                <h3><i class="fas fa-lightbulb"></i> Daily Tip</h3>
+                <p id="dailyTip">Stay hydrated! Drinking water before meals can help you feel fuller and eat less.</p>
+            </div>
+        </section>
+
+        <!-- Manual Food Input -->
+        <section id="manual" class="tab-content">
+            <h2><i class="fas fa-utensils"></i> Manual Food Entry</h2>
+            <form id="manualForm" class="card-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manualDay"><i class="fas fa-calendar-day"></i> Day</label>
+                        <select id="manualDay">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manualMealType"><i class="fas fa-clock"></i> Meal Type</label>
+                        <select id="manualMealType">
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="manualFoodName"><i class="fas fa-apple-alt"></i> Food Name</label>
+                    <input type="text" id="manualFoodName" required placeholder="e.g., Grilled Chicken Breast">
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manualAmount"><i class="fas fa-fire"></i> Amount</label>
+                        <input type="number" id="manualAmount" min="1" required placeholder="e.g., 100">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="manualUnit">Unit</label>
+                        <select id="manualUnit">
+                            <option value="kcal">kcal</option>
+                            <option value="kJ">kJ</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit"><i class="fas fa-plus"></i> Add to Planner</button>
+            </form>
+        </section>
+
+        <!-- Automatic Meal Builder -->
+        <section id="automatic" class="tab-content">
+            <h2><i class="fas fa-hamburger"></i> Meal Builder</h2>
+            
+            <div class="search-box">
+                <i class="fas fa-search search-icon"></i>
+                <input type="text" id="ingredientSearch" placeholder="Search ingredients...">
+            </div>
+            
+            <form id="mealForm" class="card-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ingredient"><i class="fas fa-carrot"></i> Ingredient</label>
+                        <select id="ingredient"></select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="ingredientQty"><i class="fas fa-balance-scale"></i> Quantity</label>
+                        <input type="number" id="ingredientQty" min="1" value="1">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="ingredientUnit">Unit</label>
+                        <select id="ingredientUnit">
+                            <option value="g">Grams (g)</option>
+                            <option value="cup">Cups</option>
+                            <option value="oz">Ounces (oz)</option>
+                            <option value="tbsp">Tablespoons (tbsp)</option>
+                            <option value="tsp">Teaspoons (tsp)</option>
+                            <option value="unit">Units (e.g., 1 egg)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button type="button" id="addIngredient" class="action-button"><i class="fas fa-plus"></i> Add</button>
+                    <button type="button" id="removeIngredient" class="action-button remove"><i class="fas fa-minus"></i> Remove Last</button>
+                </div>
+            </form>
+            
+            <div class="meal-preview">
+                <h3><i class="fas fa-list"></i> Meal Ingredients</h3>
+                <ul id="mealIngredients" class="ingredients-list"></ul>
+                <div class="meal-total">
+                    <p>Total: <span id="mealCalories">0</span> kcal (<span id="mealKj">0</span> kJ)</p>
+                </div>
+            </div>
+            
+            <form id="saveMealForm" class="card-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mealName"><i class="fas fa-tag"></i> Meal Name</label>
+                        <input type="text" id="mealName" required placeholder="e.g., Veggie Stir Fry">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="mealDay"><i class="fas fa-calendar-day"></i> Day</label>
+                        <select id="mealDay">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mealType"><i class="fas fa-clock"></i> Meal Type</label>
+                        <select id="mealType">
+                            <option value="breakfast">Breakfast</option>
+                            <option value="lunch">Lunch</option>
+                            <option value="dinner">Dinner</option>
+                            <option value="snack">Snack</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="submit"><i class="fas fa-save"></i> Add Meal to Planner</button>
+            </form>
+        </section>
+
+        <!-- Weekly Planner -->
+        <section id="planner" class="tab-content">
+            <h2><i class="fas fa-calendar-alt"></i> Weekly Meal Plan</h2>
+            
+            <div class="week-selector">
+                <button id="prevWeek" class="date-nav-btn"><i class="fas fa-chevron-left"></i></button>
+                <div class="date-picker-container">
+                    <input type="date" id="weekStartDate" class="date-picker">
+                    <div class="week-label" id="weekLabel">Current Week</div>
+                </div>
+                <button id="nextWeek" class="date-nav-btn"><i class="fas fa-chevron-right"></i></button>
+            </div>
+            
+            <div class="action-buttons">
+                <button id="exportPlan"><i class="fas fa-file-export"></i> Export Plan</button>
+                <button id="addExercise"><i class="fas fa-running"></i> Add Exercise</button>
+                <button id="copyWeek"><i class="fas fa-copy"></i> Copy Week</button>
+                <button id="pasteWeek" style="display: none;"><i class="fas fa-paste"></i> Paste Week</button>
+            </div>
+            
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Day</th>
+                            <th>Breakfast</th>
+                            <th>Lunch</th>
+                            <th>Dinner</th>
+                            <th>Snack</th>
+                            <th>Exercises</th>
+                            <th>Total Intake</th>
+                            <th>Exercise Burn</th>
+                            <th>Net Calories</th>
+                            <th>Remaining (Goal: <span id="goalDisplay"></span>)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="plannerBody">
+                        <tr><td>Monday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Tuesday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Wednesday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Thursday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Friday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Saturday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                        <tr><td>Sunday</td><td></td><td></td><td></td><td></td><td></td><td>0</td><td>0</td><td>0</td><td></td></tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div id="weeklySummary">
+                <h3><i class="fas fa-chart-bar"></i> Weekly Summary</h3>
+                <div class="summary-stats">
+                    <div class="stat-item">
+                        <i class="fas fa-utensils"></i>
+                        <div>
+                            <span class="stat-label">Total Weekly Intake:</span>
+                            <span class="stat-value"><span id="weeklyTotal">0</span> kcal (<span id="weeklyTotalKj">0</span> kJ)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <i class="fas fa-running"></i>
+                        <div>
+                            <span class="stat-label">Total Weekly Exercise Burn:</span>
+                            <span class="stat-value"><span id="weeklyExercise">0</span> kcal (<span id="weeklyExerciseKj">0</span> kJ)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <i class="fas fa-balance-scale"></i>
+                        <div>
+                            <span class="stat-label">Weekly Outcome:</span>
+                            <span class="stat-value" id="weeklyOutcome"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <i class="fas fa-weight"></i>
+                        <div>
+                            <span class="stat-label">Estimated Weight Lost:</span>
+                            <span class="stat-value"><span id="weightLost">0</span> kg (<span id="weightLostLb">0</span> lb)</span>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-item">
+                        <i class="fas fa-hourglass-half"></i>
+                        <div>
+                            <span class="stat-label">Estimated Time to Goal:</span>
+                            <span class="stat-value"><span id="timeToGoal">0</span> weeks</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
+    <script src="tracker.js"></script>
+    <script>
+        // Initialize on document load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize page (theme, menu, login check)
+            if (initializePage()) {
+                // Load profile for this user
+                loadUserProfile(getFromStorage('currentUser'));
+            }
+        });
+        // Initialize on document load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize theme
+            initializeTheme();
+            
+            // Check if logged in and load profile
+            checkUserSession();
+            
+            // Function to check user session and redirect if needed
+            function checkUserSession() {
+                const currentUser = getFromStorage('currentUser');
+                if (!currentUser) {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Set welcome message if element exists
+                const welcomeElement = document.getElementById('welcomeMessage');
+                if (welcomeElement && currentUser.name) {
+                    welcomeElement.textContent = `Welcome, ${currentUser.name}`;
+                }
+                
+                // Load profile for this user
+                loadUserProfile(currentUser);
+            }
+        });
+        
+        // Tab navigation
+        const tabs = document.querySelectorAll('.tab-content');
+        const navButtons = document.querySelectorAll('.nav-button');
+        
+        function showTab(tabId) {
+            tabs.forEach(tab => {
+                tab.classList.remove('active');
+            });
+            navButtons.forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`[id="view${tabId.charAt(0).toUpperCase() + tabId.slice(1)}"]`).classList.add('active');
+        }
+        
+        document.getElementById('viewSummary').addEventListener('click', () => showTab('summary'));
+        document.getElementById('viewManual').addEventListener('click', () => showTab('manual'));
+        document.getElementById('viewMealBuilder').addEventListener('click', () => showTab('automatic'));
+        document.getElementById('viewPlanner').addEventListener('click', () => showTab('planner'));
+        document.getElementById('goToManual').addEventListener('click', () => showTab('manual'));
+        
+        // Initialize water tracker
+        function initializeWaterTracker() {
+            try {
+                const currentUser = getFromStorage('currentUser');
+                if (!currentUser || !currentUser.email) {
+                    console.error('User not logged in');
+                    return;
+                }
+                
+                // Format date for storage key - YYYY-MM-DD
+                const today = new Date().toISOString().split('T')[0];
+                const waterKey = `water_${currentUser.email}_${today}`;
+                
+                // Get existing water count from storage
+                let waterCount = parseInt(localStorage.getItem(waterKey) || '0');
+                
+                // Create water glasses container if it doesn't exist
+                const waterContainer = document.getElementById('waterGlasses');
+                if (!waterContainer) {
+                    console.error('Water glasses container not found');
+                    return;
+                }
+                
+                // Update display
+                updateWaterDisplay(waterCount);
+                
+                // Add water glass
+                const addWaterBtn = document.getElementById('addWater');
+                if (addWaterBtn) {
+                    addWaterBtn.addEventListener('click', function() {
+                        if (waterCount < 8) {
+                            waterCount++;
+                            localStorage.setItem(waterKey, waterCount);
+                            updateWaterDisplay(waterCount);
+                            showNotification('Water intake updated!', 'success');
+                        }
+                    });
+                }
+                
+                // Remove water glass
+                const removeWaterBtn = document.getElementById('removeWater'); 
+                if (removeWaterBtn) {
+                    removeWaterBtn.addEventListener('click', function() {
+                        if (waterCount > 0) {
+                            waterCount--;
+                            localStorage.setItem(waterKey, waterCount);
+                            updateWaterDisplay(waterCount);
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error initializing water tracker:', error);
+            }
+        }
+        
+        // Update water display
+        function updateWaterDisplay(count) {
+            const container = document.getElementById('waterGlasses');
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 8; i++) {
+                const glass = document.createElement('div');
+                glass.className = i < count ? 'water-glass filled' : 'water-glass';
+                container.appendChild(glass);
+                
+                // Add click handler to each glass for direct interaction
+                glass.addEventListener('click', function() {
+                    // Get current user
+                    const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                    const today = new Date().toISOString().split('T')[0];
+                    const waterKey = `water_${currentUser.email}_${today}`;
+                    
+                    // Toggle glass state
+                    let newCount = 0;
+                    if (i < count) {
+                        // If clicking on filled glass, empty this and all after
+                        newCount = i;
+                    } else {
+                        // If clicking on empty glass, fill this and all before
+                        newCount = i + 1;
+                    }
+                    
+                    // Save to storage
+                    localStorage.setItem(waterKey, newCount);
+                    
+                    // Update display
+                    updateWaterDisplay(newCount);
+                    showNotification(`Water intake updated to ${newCount} glasses`);
+                });
+            }
+            
+            // Update progress bar
+            const percent = (count / 8) * 100;
+            document.getElementById('waterProgress').style.width = `${percent}%`;
+            document.getElementById('waterStatus').textContent = `${count}/8 glasses`;
+        }
+        
+        // Show notification
+        function showNotification(message) {
+            // Check if notification container exists
+            let notificationContainer = document.getElementById('notification-container');
+            
+            if (!notificationContainer) {
+                notificationContainer = document.createElement('div');
+                notificationContainer.id = 'notification-container';
+                notificationContainer.style.position = 'fixed';
+                notificationContainer.style.bottom = '20px';
+                notificationContainer.style.right = '20px';
+                notificationContainer.style.zIndex = '1000';
+                document.body.appendChild(notificationContainer);
+            }
+            
+            // Create notification
+            const notification = document.createElement('div');
+            notification.style.backgroundColor = 'var(--success-color)';
+            notification.style.color = 'white';
+            notification.style.padding = '15px';
+            notification.style.margin = '10px';
+            notification.style.borderRadius = 'var(--border-radius)';
+            notification.style.boxShadow = 'var(--card-shadow)';
+            notification.style.display = 'flex';
+            notification.style.alignItems = 'center';
+            notification.style.transition = 'all 0.3s';
+            notification.style.transform = 'translateX(100%)';
+            notification.style.opacity = '0';
+            
+            notification.innerHTML = `<i class="fas fa-check-circle" style="margin-right: 10px;"></i> ${message}`;
+            
+            // Add to container
+            notificationContainer.appendChild(notification);
+            
+            // Trigger animation
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+                notification.style.opacity = '1';
+            }, 50);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                notification.style.opacity = '0';
+                setTimeout(() => {
+                    notificationContainer.removeChild(notification);
+                }, 300);
+            }, 3000);
+        }
+        
+        // Wait for DOM to load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if logged in and load profile
+            const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+            if (!currentUser) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('welcomeMessage').textContent = `Welcome, ${currentUser.name}`;
+            const profileKey = `profile_${currentUser.email}`;
+            const profile = JSON.parse(localStorage.getItem(profileKey));
+            if (!profile) {
+                window.location.href = 'index.html'; // Redirect to profile if no data
+                return;
+            }
+
+            // If no URL parameters, redirect with profile data
+            if (!window.location.search) {
+                window.location.href = `tracker.html?bmr=${profile.bmr}&tdee=${profile.tdee}&weight=${profile.weight}&goalWeight=${profile.goalWeight}&timeToGoal=${profile.timeToGoal}&dailyDeficit=${profile.dailyDeficit}&goalCalories=${profile.dailyGoal}&timeUnit=${profile.timeUnit}`;
+                return;
+            }
+
+            // Parse URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const bmr = parseFloat(urlParams.get('bmr')) || 0;
+            const tdee = parseFloat(urlParams.get('tdee')) || 0;
+            const dailyDeficitFromUrl = parseFloat(urlParams.get('dailyDeficit'));
+            const goalCaloriesFromUrl = parseFloat(urlParams.get('goalCalories'));
+
+            // Set dailyDeficit and dailyGoal from URL parameters with fallbacks
+            let dailyDeficit = !isNaN(dailyDeficitFromUrl) ? dailyDeficitFromUrl : 0;
+            let dailyGoal = !isNaN(goalCaloriesFromUrl) ? goalCaloriesFromUrl : tdee;
+
+            // Ensure valid numbers to prevent NaN issues
+            if (isNaN(dailyGoal) || dailyGoal < 0) {
+                dailyGoal = tdee > 0 ? tdee : 0;
+            }
+            if (isNaN(dailyDeficit) || dailyDeficit < 0) {
+                dailyDeficit = 0;
+            }
+
+            // Update summary section
+            document.getElementById('bmr').textContent = bmr.toFixed(0);
+            document.getElementById('bmrUnits').textContent = 'kcal';
+            document.getElementById('tdee').textContent = tdee.toFixed(0);
+            document.getElementById('tdeeUnits').textContent = 'kcal';
+            document.getElementById('dailyDeficit').textContent = dailyDeficit.toFixed(0);
+            document.getElementById('deficitUnits').textContent = 'kcal';
+            document.getElementById('dailyGoal').textContent = dailyGoal.toFixed(0);
+            document.getElementById('goalUnits').textContent = 'kcal';
+            document.getElementById('goalDisplay').textContent = dailyGoal.toFixed(0) + ' kcal';
+
+            // Add warning if deficit exceeds 500 kcal
+            if (dailyDeficit > 500) {
+                const note = document.querySelector('.note');
+                note.style.color = 'var(--error-color)';
+                note.innerHTML = '<i class="fas fa-exclamation-triangle"></i> Warning: A deficit over 500 kcal is not recommended for long-term weight loss.';
+            }
+
+            // Expose dailyGoal to tracker.js
+            window.dailyGoal = dailyGoal;
+
+            // Back to Profile button functionality
+            const backToProfileBtn = document.getElementById('backToProfile');
+            if (backToProfileBtn) {
+                backToProfileBtn.addEventListener('click', function() {
+                    window.location.href = 'index.html';
+                });
+            }
+            
+            // Dashboard link functionality
+            const navDashboard = document.getElementById('navDashboard');
+            if (navDashboard) {
+                navDashboard.addEventListener('click', function() {
+                    window.location.href = 'dashboard.html';
+                });
+            }
+            
+            // Add Exercise button
+            document.getElementById('goToExercise').addEventListener('click', function() {
+                window.location.href = `exercise.html?bmr=${bmr}&dailyGoal=${dailyGoal}&weight=${profile.weight}&goal=${profile.goalWeight}&tdee=${tdee}&time=${profile.timeToGoal}`;
+            });
+            
+            // Initialize water tracker
+            initializeWaterTracker();
+        });
+
+        // PWA Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed:', err));
+            });
+        }
+    </script>
+    
+    <style>
+        /* Tab Navigation */
+        .nav-bar {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+            background-color: rgba(0, 0, 0, 0.05);
+            padding: 10px;
+            border-radius: var(--border-radius);
+        }
+        
+        .nav-button {
+            background-color: transparent;
+            color: var(--text-primary);
+            border: none;
+            padding: 10px 15px;
+            border-radius: var(--input-border-radius);
+            cursor: pointer;
+            flex: 1;
+            min-width: 110px;
+            margin: 0;
+            transition: all var(--transition-speed);
+        }
+        
+        .nav-button i {
+            margin-right: 8px;
+        }
+        
+        .nav-button:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+            transform: translateY(0);
+        }
+        
+        .nav-button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        
+        /* Summary Cards */
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(230px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .summary-card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: background-color var(--transition-speed);
+        }
+        
+        .summary-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background-color: var(--primary-light);
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+        }
+        
+        .summary-content {
+            flex: 1;
+        }
+        
+        .summary-content h3 {
+            font-size: 16px;
+            color: var(--text-secondary);
+            margin: 0 0 5px 0;
+        }
+        
+        .summary-content p {
+            font-size: 24px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin: 0;
+        }
+        
+        .summary-content .units {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 0;
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        /* Card Form */
+        .card-form {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin-bottom: 20px;
+            transition: background-color var(--transition-speed);
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        /* Search Box */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-secondary);
+        }
+        
+        #ingredientSearch {
+            padding-left: 35px;
+        }
+        
+        /* Meal Preview */
+        .meal-preview {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 20px;
+            margin: 20px 0;
+            transition: background-color var(--transition-speed);
+        }
+        
+        .ingredients-list {
+            margin: 15px 0;
+            padding: 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        
+        .meal-total {
+            background-color: var(--primary-light);
+            padding: 10px 15px;
+            border-radius: var(--input-border-radius);
+            font-weight: 600;
+            margin-top: 15px;
+        }
+        
+        /* Button Group */
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .button-group button {
+            margin-top: 0;
+        }
+        
+        .button-group .remove {
+            background-color: var(--error-color);
+        }
+        
+        .button-group .remove:hover {
+            background-color: #D32F2F;
+        }
+        
+        /* Table Container */
+        .table-container {
+            overflow-x: auto;
+            margin: 20px 0;
+            box-shadow: var(--card-shadow);
+            border-radius: var(--border-radius);
+        }
+        
+        /* Weekly Summary Stats */
+        .summary-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .stat-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            background-color: var(--card-bg);
+            border-radius: var(--input-border-radius);
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            transition: background-color var(--transition-speed);
+        }
+        
+        .stat-item i {
+            font-size: 24px;
+            color: var(--primary-color);
+            width: 30px;
+            text-align: center;
+        }
+        
+        .stat-label {
+            display: block;
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-bottom: 5px;
+        }
+        
+        .stat-value {
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        /* Water Tracking */
+        .water-tracker {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            margin: 25px 0;
+        }
+        
+        #waterGlasses {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        
+        .water-glass {
+            width: 35px;
+            height: 50px;
+            background-color: var(--progress-bg);
+            border-radius: 8px;
+            cursor: pointer;
+            position: relative;
+            transition: all var(--transition-speed);
+            box-shadow: inset 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .water-glass.filled {
+            background-color: var(--progress-water);
+            box-shadow: 0 2px 5px rgba(41, 182, 246, 0.3);
+        }
+        
+        .water-glass:hover {
+            transform: translateY(-3px);
+        }
+        
+        /* Water glass animation */
+        .water-glass.filled::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.2) 50%,
+                transparent 50%,
+                transparent 100%
+            );
+            border-radius: 7px;
+            z-index: 1;
+        }
+        
+        .water-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-left: 10px;
+        }
+        
+        .water-btn {
+            background: var(--gradient-info, linear-gradient(135deg, #29B6F6, #2979FF));
+            color: white;
+            border: none;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all var(--transition-speed);
+            box-shadow: 0 3px 8px rgba(41, 121, 255, 0.3);
+            padding: 0;
+            margin: 0;
+        }
+        
+        .water-btn:hover {
+            transform: scale(1.15);
+            box-shadow: 0 5px 12px rgba(41, 121, 255, 0.4);
+        }
+        
+        .water-btn:active {
+            transform: scale(0.95);
+        }
+        
+        #waterStatus {
+            margin-top: 10px;
+            color: var(--progress-water);
+            font-weight: 500;
+            font-size: 16px;
+        }
+        
+        /* Progress bars */
+        .water-progress-container {
+            height: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            background-color: var(--progress-bg);
+            overflow: hidden;
+        }
+        
+        .progress-bar-water {
+            background: linear-gradient(90deg, #29B6F6, #2979FF);
+            height: 100%;
+            border-radius: 10px;
+            position: relative;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 5px rgba(41, 121, 255, 0.5);
+        }
+        
+        .progress-bar-water::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Progress container */
+        .water-progress-container {
+            height: 10px;
+            border-radius: 10px;
+            margin: 15px 0;
+            background-color: var(--progress-bg, #f5f5f5);
+            overflow: hidden;
+        }
+        
+        .progress-bar-water {
+            background: linear-gradient(90deg, #29B6F6, #2979FF);
+            height: 100%;
+            border-radius: 10px;
+            position: relative;
+            transition: width 0.5s ease-in-out;
+            box-shadow: 0 0 5px rgba(41, 121, 255, 0.5);
+        }
+        
+        .progress-bar-water::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0) 0%,
+                rgba(255, 255, 255, 0.3) 50%,
+                rgba(255, 255, 255, 0) 100%
+            );
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+        
+        /* Cards */
+        .card {
+            background-color: var(--card-bg);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--card-shadow);
+            transition: all var(--transition-speed);
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .card-header i {
+            font-size: 24px;
+            margin-right: 10px;
+            color: var(--primary-color);
+        }
+        
+        .card-title {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+        
+        .card-body {
+            color: var(--text-secondary);
+        }
+        
+        /* Daily Tips */
+        .daily-tip {
+            background-color: var(--info-color);
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin: 20px 0;
+            position: relative;
+            transition: background-color var(--transition-speed);
+        }
+        
+        .daily-tip h3 {
+            color: white;
+            margin-top: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .daily-tip p {
+            margin-bottom: 0;
+        }
+        
+        /* Week Selector Styles */
+        .week-selector {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 12px;
+            box-shadow: var(--card-shadow);
+        }
+        
+        .date-nav-btn {
+            background: var(--background-main);
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .date-nav-btn:hover {
+            background: var(--primary-light);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+        
+        .date-picker-container {
+            margin: 0 15px;
+            text-align: center;
+            flex: 1;
+            max-width: 300px;
+            position: relative;
+        }
+        
+        .date-picker {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid var(--divider-color);
+            border-radius: var(--input-border-radius);
+            font-size: 16px;
+            color: var(--text-primary);
+            background-color: white;
+            cursor: pointer;
+            text-align: center;
+        }
+        
+        .week-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+            margin-top: 5px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .summary-cards,
+            .summary-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .form-row .form-group {
+                min-width: 100%;
+            }
+            
+            .nav-button {
+                padding: 8px;
+                font-size: 14px;
+            }
+            
+            .nav-button i {
+                margin-right: 5px;
+            }
+            
+            .water-tracker {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .week-selector {
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+            
+            .date-picker-container {
+                order: -1;
+                flex-basis: 100%;
+                margin-bottom: 10px;
+            }
+        }
+    </style>
+</body>
+</html>

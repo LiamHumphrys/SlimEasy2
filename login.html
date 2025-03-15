@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SlimEasy - Login or create an account to start tracking your nutrition and fitness goals">
+    <meta name="theme-color" content="#4CAF50">
+    <title>SlimEasy - Login or Create Account</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Preload critical assets -->
+    <link rel="preload" href="theme.js" as="script">
+    <link rel="preload" href="utils.js" as="script">
+    <link rel="preload" href="slimeasylogo.jpg" as="image">
+</head>
+<body>
+    <div class="container">
+        <img src="slimeasylogo.jpg" alt="SlimEasy Logo" class="logo" style="margin-top: 20px;">
+        <h1>Welcome to SlimEasy</h1>
+        <p style="text-align: center; margin-bottom: 30px; color: var(--text-secondary);">Your personal weight management assistant</p>
+        
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; justify-content: center;">
+            <!-- Create Account -->
+            <section id="createAccount" style="flex: 1; min-width: 300px;">
+                <h2><i class="fas fa-user-plus"></i> Create Account</h2>
+                <form id="createForm">
+                    <div class="form-group">
+                        <label for="createName">Name</label>
+                        <input type="text" id="createName" required placeholder="e.g., John Doe">
+                    </div>
+                    <div class="form-group">
+                        <label for="createEmail">Email</label>
+                        <input type="email" id="createEmail" required placeholder="e.g., john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="createPassword">Password</label>
+                        <input type="password" id="createPassword" required placeholder="Enter password">
+                    </div>
+                    <button type="submit">Create Account</button>
+                </form>
+            </section>
+
+            <!-- Login -->
+            <section id="login" style="flex: 1; min-width: 300px;">
+                <h2><i class="fas fa-sign-in-alt"></i> Login</h2>
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginEmail">Email</label>
+                        <input type="email" id="loginEmail" required placeholder="e.g., john@example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPassword">Password</label>
+                        <input type="password" id="loginPassword" required placeholder="Enter password">
+                    </div>
+                    <button type="submit">Login</button>
+                </form>
+                <div id="loginError" style="display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Invalid email or password.
+                </div>
+            </section>
+        </div>
+        
+        <div style="text-align: center; margin-top: 30px; color: var(--text-secondary);">
+            <p>SlimEasy helps you manage your weight by tracking calories and planning meals.</p>
+            <p>All data is stored locally in your browser.</p>
+        </div>
+    </div>
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Just initialize theme on login page - no login check needed
+            initializeTheme();
+            
+            // Handle form submissions
+            setupFormHandlers();
+            
+            // Register service worker for PWA functionality
+            registerServiceWorker();
+        });
+        
+        /**
+         * Set up form submission handlers
+         */
+        function setupFormHandlers() {
+            // Handle account creation
+            const createForm = document.getElementById('createForm');
+            if (createForm) {
+                createForm.addEventListener('submit', handleAccountCreation);
+            }
+            
+            // Handle login form
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', handleLogin);
+            }
+        }
+        
+        /**
+         * Handle account creation form submission
+         * @param {Event} e - Form submission event
+         */
+        function handleAccountCreation(e) {
+            e.preventDefault();
+            
+            // Get form input values
+            const name = document.getElementById('createName').value.trim();
+            const email = document.getElementById('createEmail').value.trim().toLowerCase();
+            const password = document.getElementById('createPassword').value;
+            
+            // Validate inputs
+            if (!name || !email || !password) {
+                showNotification('Please fill in all fields.', 'warning');
+                return;
+            }
+            
+            // Get existing accounts or create new array
+            const accounts = getFromStorage('accounts', []);
+            
+            // Check if email already exists
+            if (accounts.some(acc => acc.email === email)) {
+                showNotification('This email is already registered.', 'error');
+                return;
+            }
+            
+            // Add new account
+            accounts.push({ name, email, password });
+            saveToStorage('accounts', accounts);
+            
+            // Set as current user
+            saveToStorage('currentUser', { name, email });
+            
+            // Show success message and redirect
+            showNotification('Account created successfully!', 'success');
+            setTimeout(() => {
+                window.location.href = 'index.html';
+            }, 1000);
+        }
+        
+        /**
+         * Handle login form submission
+         * @param {Event} e - Form submission event
+         */
+        function handleLogin(e) {
+            e.preventDefault();
+            
+            // Get form input values
+            const email = document.getElementById('loginEmail').value.trim().toLowerCase();
+            const password = document.getElementById('loginPassword').value;
+            
+            // Validate inputs
+            if (!email || !password) {
+                showLoginError('Please enter both email and password.');
+                return;
+            }
+            
+            // Get accounts from storage
+            const accounts = getFromStorage('accounts', []);
+            
+            // Find matching account
+            const account = accounts.find(acc => acc.email === email && acc.password === password);
+            
+            if (account) {
+                // Login successful
+                saveToStorage('currentUser', { name: account.name, email });
+                hideLoginError();
+                
+                // Show success notification
+                showNotification('Login successful!', 'success');
+                
+                // Check if profile exists and redirect accordingly
+                const profileKey = `profile_${email}`;
+                const profile = getFromStorage(profileKey);
+                
+                setTimeout(() => {
+                    window.location.href = profile ? 'dashboard.html' : 'index.html';
+                }, 800);
+            } else {
+                // Login failed
+                showLoginError('Invalid email or password.');
+            }
+        }
+        
+        /**
+         * Show login error message
+         * @param {string} message - Error message to display
+         */
+        function showLoginError(message) {
+            const errorElement = document.getElementById('loginError');
+            if (errorElement) {
+                errorElement.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+                errorElement.style.display = 'block';
+            }
+        }
+        
+        /**
+         * Hide login error message
+         */
+        function hideLoginError() {
+            const errorElement = document.getElementById('loginError');
+            if (errorElement) {
+                errorElement.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

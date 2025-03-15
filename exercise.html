@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SlimEasy - Track your exercise and physical activity for better weight management">
+    <meta name="theme-color" content="#4CAF50">
+    <title>SlimEasy - Add Exercise</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <!-- Preload critical assets -->
+    <link rel="preload" href="theme.js" as="script">
+    <link rel="preload" href="utils.js" as="script">
+    <link rel="preload" href="exercise.js" as="script">
+    <link rel="preload" href="slimeasylogo.jpg" as="image">
+</head>
+<body>
+    <!-- Main Navigation -->
+    <nav class="main-nav">
+        <div class="main-nav-container">
+            <a href="index.html" class="main-nav-logo">
+                <img src="slimeasylogo.jpg" alt="SlimEasy">
+                <span>SlimEasy</span>
+            </a>
+            <button class="menu-toggle" id="menuToggle">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="main-nav-links" id="mainNavLinks">
+                <a href="index.html" class="nav-link">
+                    <i class="fas fa-user"></i> Profile
+                </a>
+                <a href="dashboard.html" class="nav-link">
+                    <i class="fas fa-chart-line"></i> Dashboard
+                </a>
+                <a href="tracker.html" class="nav-link">
+                    <i class="fas fa-utensils"></i> Food Tracker
+                </a>
+                <a href="exercise.html" class="nav-link active">
+                    <i class="fas fa-running"></i> Exercise
+                </a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1>Add Exercise</h1>
+        
+        <section id="exercise" class="card-section">
+            <h2><i class="fas fa-running"></i> Track Your Exercise</h2>
+            
+            <form id="exerciseForm" class="card-form">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="exerciseDay"><i class="fas fa-calendar-day"></i> Day</label>
+                        <select id="exerciseDay">
+                            <option value="0">Monday</option>
+                            <option value="1">Tuesday</option>
+                            <option value="2">Wednesday</option>
+                            <option value="3">Thursday</option>
+                            <option value="4">Friday</option>
+                            <option value="5">Saturday</option>
+                            <option value="6">Sunday</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="exerciseType"><i class="fas fa-dumbbell"></i> Exercise Type</label>
+                        <select id="exerciseType">
+                            <optgroup label="Running">
+                                <option value="running_5mph">Running (5 mph - Low Intensity)</option>
+                                <option value="running_6mph">Running (6 mph - Moderate Intensity)</option>
+                                <option value="running_7mph">Running (7 mph - High Intensity)</option>
+                            </optgroup>
+                            <optgroup label="Walking">
+                                <option value="walking_3mph">Walking (3 mph - Low Intensity)</option>
+                                <option value="walking_4mph">Walking (4 mph - Moderate Intensity)</option>
+                                <option value="walking_5mph">Walking (5 mph - High Intensity)</option>
+                            </optgroup>
+                            <optgroup label="Cycling">
+                                <option value="cycling_10mph">Cycling (10 mph - Low Intensity)</option>
+                                <option value="cycling_12mph">Cycling (12 mph - Moderate Intensity)</option>
+                                <option value="cycling_14mph">Cycling (14 mph - High Intensity)</option>
+                            </optgroup>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="duration"><i class="fas fa-clock"></i> Duration (minutes)</label>
+                    <input type="number" id="duration" min="1" required placeholder="e.g., 30">
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="primary-button">
+                        <i class="fas fa-plus-circle"></i> Add Exercise
+                    </button>
+                    <button type="button" onclick="window.location.href='tracker.html'" class="secondary-button">
+                        <i class="fas fa-arrow-left"></i> Back to Planner
+                    </button>
+                </div>
+            </form>
+            
+            <div id="exerciseSummary" class="exercise-summary">
+                <!-- Will be filled by JavaScript -->
+            </div>
+            
+            <div class="info-card">
+                <h3><i class="fas fa-info-circle"></i> Exercise Intensity Guide</h3>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <h4>Low Intensity</h4>
+                        <p>You can maintain a conversation easily. Suitable for beginners or recovery days.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>Moderate Intensity</h4>
+                        <p>You can speak in short sentences. Good for improving cardiovascular health.</p>
+                    </div>
+                    <div class="info-item">
+                        <h4>High Intensity</h4>
+                        <p>Speaking is difficult. Best for short bursts to maximize calorie burn.</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <script src="theme.js"></script>
+    <script src="utils.js"></script>
+    <script src="exercise.js"></script>
+    <script>
+        // Initialize when document is loaded
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize page (theme, menu, login check)
+            if (initializePage()) {
+                // Set up exercise form and summary
+                setupExerciseTracking();
+                
+                // Register service worker
+                registerServiceWorker();
+            }
+        });
+        
+        /**
+         * Check if user is logged in, redirect if not
+         */
+        function checkUserLogin() {
+            const currentUser = getFromStorage('currentUser');
+            if (!currentUser) {
+                window.location.href = 'login.html';
+            }
+        }
+        
+        /**
+         * Set up exercise tracking form and animations
+         */
+        function setupExerciseTracking() {
+            // Show animation when exercise is added
+            const exerciseForm = document.getElementById('exerciseForm');
+            if (exerciseForm) {
+                exerciseForm.addEventListener('submit', function() {
+                    setTimeout(() => {
+                        const summary = document.getElementById('exerciseSummary');
+                        if (summary && summary.textContent) {
+                            summary.classList.add('visible');
+                        }
+                    }, 100);
+                });
+            }
+            
+            // Set current day by default
+            const today = new Date().getDay(); // 0 is Sunday
+            const dayIndex = today === 0 ? 6 : today - 1; // Convert to our 0-based index (Monday = 0)
+            
+            const daySelect = document.getElementById('exerciseDay');
+            if (daySelect) {
+                daySelect.value = dayIndex;
+            }
+        }
+        
+        // Check user login
+        checkUserLogin();
+        
+        /**
+         * Check if user is logged in, redirect if not
+         */
+        function checkUserLogin() {
+            try {
+                const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+                if (!currentUser || !currentUser.email) {
+                    console.log('User not logged in, redirecting to login page');
+                    window.location.href = 'login.html';
+                    return false;
+                }
+                return true;
+            } catch (e) {
+                console.error('Error checking user login:', e);
+                window.location.href = 'login.html';
+                return false;
+            }
+        }
+        
+        // Check login status
+        checkUserLogin();
+        
+        // Display a summary of added exercises
+        document.getElementById('exerciseForm').addEventListener('submit', function() {
+            setTimeout(() => {
+                const summary = document.getElementById('exerciseSummary');
+                if (summary && summary.textContent) {
+                    summary.classList.add('visible');
+                }
+            }, 100);
+        });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js')
+                    .then(reg => console.log('Service Worker registered'))
+                    .catch(err => console.log('Service Worker failed:', err));
+            });
+        }
+    </script>
+    
+    <style>
+        .card-section {
+            background-color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--card-shadow);
+            padding: 30px;
+        }
+        
+        .card-form {
+            margin-bottom: 25px;
+        }
+        
+        .form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+            min-width: 250px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+        }
+        
+        .primary-button {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: var(--input-border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            flex: 1;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+        
+        .primary-button:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+        
+        .secondary-button {
+            background-color: var(--background-main);
+            color: var(--text-primary);
+            border: 1px solid var(--divider-color);
+            padding: 12px 20px;
+            border-radius: var(--input-border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            flex: 1;
+            transition: background-color var(--transition-speed), transform var(--transition-speed);
+        }
+        
+        .secondary-button:hover {
+            background-color: #f5f5f5;
+            transform: translateY(-2px);
+        }
+        
+        .exercise-summary {
+            background-color: var(--primary-light);
+            border-radius: var(--input-border-radius);
+            padding: 15px;
+            margin: 20px 0;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .exercise-summary.visible {
+            opacity: 1;
+        }
+        
+        .exercise-summary:before {
+            content: "\f058";
+            font-family: "Font Awesome 6 Free";
+            font-weight: 900;
+            color: var(--primary-color);
+            font-size: 20px;
+        }
+        
+        .info-card {
+            background-color: #f5f5f5;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-top: 30px;
+        }
+        
+        .info-card h3 {
+            margin-top: 0;
+            color: var(--text-primary);
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .info-item {
+            background-color: white;
+            border-radius: var(--input-border-radius);
+            padding: 15px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        
+        .info-item h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+            font-size: 16px;
+        }
+        
+        .info-item p {
+            margin-bottom: 0;
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+        
+        @media (max-width: 768px) {
+            .button-group {
+                flex-direction: column;
+            }
+            
+            .info-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</body>
+</html>
